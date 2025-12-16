@@ -23,6 +23,10 @@ const Header = () => {
     setIsDropdownOpen(!isDropdownOpen)
   }
 
+  const logout = () => {
+    // Add your logout logic here
+  }
+
   const handleMenuItemClick = (action) => {
     console.log(`${action} clicked`)
     setIsDropdownOpen(false)
