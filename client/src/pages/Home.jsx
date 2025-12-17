@@ -5,16 +5,19 @@ import ProductCard from '../components/ProductCard'
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   // Fetch featured products
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/products')
+        const response = await fetch(`${backendUrl}/products`);
         const data = await response.json()
+        const featuredproducts = data.products || [];
 
-        setFeaturedProducts(data.slice(0, 4))
-        
+
+        setFeaturedProducts(featuredproducts.slice(0, 4))
+
         {/*if (data.success) {
           // Get first 4 products as featured
           setFeaturedProducts(data.slice(0, 4))
@@ -51,7 +54,7 @@ const Home = () => {
       description: 'Farm fresh vegetables daily'
     },
     {
-      name: 'Medicines' ,
+      name: 'Medicines',
       image: '#',
       description: 'Medicines for daily requirement'
     }
@@ -69,14 +72,14 @@ const Home = () => {
             Your neighborhood store for fresh products, daily essentials, and quality groceries at affordable prices
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              to="/products" 
+            <Link
+              to="/products"
               className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors transform hover:scale-105"
             >
               Shop Now
             </Link>
-            <Link 
-              to="/contact" 
+            <Link
+              to="/contact"
               className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-colors"
             >
               Contact Us
@@ -98,7 +101,7 @@ const Home = () => {
               <h3 className="text-xl font-semibold mb-2">Best Prices</h3>
               <p className="text-gray-600">Competitive prices on all products with regular discounts and offers</p>
             </div>
-            
+
             <div className="text-center p-6">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +111,7 @@ const Home = () => {
               <h3 className="text-xl font-semibold mb-2">Fresh Quality</h3>
               <p className="text-gray-600">Daily fresh products sourced directly from trusted suppliers</p>
             </div>
-            
+
             <div className="text-center p-6">
               <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,18 +135,18 @@ const Home = () => {
               Explore our wide range of categories to find exactly what you need for your home and family
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((category, index) => (
-              <Link 
+              <Link
                 key={index}
                 to={`/products?category=${encodeURIComponent(category.name)}`}
                 className="group block"
               >
                 <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
                   <div className="relative h-48">
-                    <img 
-                      src={category.image} 
+                    <img
+                      src={category.image}
                       alt={category.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -179,14 +182,14 @@ const Home = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product._id} product={product} />
               ))}
             </div>
           )}
 
           <div className="text-center">
-            <Link 
-              to="/products" 
+            <Link
+              to="/products"
               className="bg-green-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors inline-block"
             >
               View All Products
@@ -229,9 +232,9 @@ const Home = () => {
               </div>
             </div>
             <div>
-              <img 
-                src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=600&h=400&fit=crop" 
-                alt="Store Interior" 
+              <img
+                src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=600&h=400&fit=crop"
+                alt="Store Interior"
                 className="rounded-lg shadow-lg w-full h-auto"
               />
             </div>
@@ -247,14 +250,14 @@ const Home = () => {
             Visit us today or browse our products online. We're here to serve you with the best shopping experience!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              to="/products" 
+            <Link
+              to="/products"
               className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Browse Products
             </Link>
-            <Link 
-              to="/contact" 
+            <Link
+              to="/contact"
               className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-colors"
             >
               Get Directions

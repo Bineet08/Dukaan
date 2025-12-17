@@ -1,46 +1,49 @@
-import React from 'react'
+import { useCart } from "../context/CartContext";
 
 const ProductCard = ({ product }) => {
-  const handleAddToCart = () => {
-    // Add your cart logic here
-    console.log('Added to cart:', product.name)
-  }
+  const { addToCart } = useCart();
+
+  const hasImage =
+    product.image && product.image.trim() !== "";
 
   return (
-    <div className='bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden'>
-      <div className='relative'>
-        <img 
-          src={product.image} 
+    <div className="border rounded-lg p-4 shadow-sm flex flex-col">
+      {hasImage ? (
+        <img
+          src={product.image}
           alt={product.name}
-          className='w-full h-48 object-cover hover:scale-105 transition-transform duration-300'
+          className="w-full h-40 object-cover mb-3"
         />
-      </div>
-      
-      <div className='p-4'>
-        <h2 className='text-lg font-semibold text-gray-800 mb-2 line-clamp-2'>
-          {product.name}
-        </h2>
-        
-        <div className='flex items-center justify-between mb-3'>
-          <p className='text-xl font-bold text-green-600'>
-            ₹{product.newPrice}
-          </p>
-          {product.originalPrice && (
-            <p className='text-sm text-gray-500 line-through'>
-              ₹{product.originalPrice}
-            </p>
-          )}
+      ) : (
+        <div className="w-full h-40 mb-3 flex items-center justify-center bg-gray-100 text-gray-400">
+          No Image
         </div>
-        
-        <button 
-          onClick={handleAddToCart}
-          className='w-full bg-green-500 hover:bg-green-600 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 active:scale-95 transform'
-        >
-          Add to Cart
-        </button>
-      </div>
-    </div>
-  )
-}
+      )}
 
-export default ProductCard
+      <h2 className="font-semibold text-lg">{product.name}</h2>
+
+      <div className="mt-2 mb-4">
+        <span className="text-green-600 font-bold">
+          ₹{product.newPrice}
+        </span>
+
+        {product.originalPrice && (
+          <span className="ml-2 line-through text-gray-400">
+            ₹{product.originalPrice}
+          </span>
+        )}
+      </div>
+
+      {// Add to Cart button 
+      }
+      <button
+        onClick={() => addToCart(product)}
+        className="mt-auto bg-green-600 hover:bg-green-700 text-white py-2 rounded-md transition"
+      >
+        Add to Cart
+      </button>
+    </div>
+  );
+};
+
+export default ProductCard;

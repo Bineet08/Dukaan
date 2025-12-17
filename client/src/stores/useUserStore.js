@@ -2,42 +2,73 @@ import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
 
-export const useUserStore = create((set, get) => ({
-    user: null,
+export const useUserStore = create((set) => ({
+    // 🔥 hydrate from localStorage
+    user: JSON.parse(localStorage.getItem("user")) || null,
     loading: false,
-    checkingAuth: true,
-    setUser: (user) => set({ user }),
+
+    setUser: (user) => {
+        localStorage.setItem("user", JSON.stringify(user));
+        set({ user });
+    },
 
     register: async (name, email, password, confirmPassword) => {
-        set({ loading: true });
         if (password !== confirmPassword) {
             toast.error("Passwords do not match");
-            return;
+            throw new Error("Passwords do not match");
         }
-        try {
-            const response = await axiosInstance.post("/auth/register", { name, email, password });
 
-            if (response.data.error) {
-                toast.error(response.data.error);
-                return;
-            }
-            set({ user: response.data, loading: false });
+        try {
+            set({ loading: true });
+
+            const { data } = await axiosInstance.post("/auth/register", {
+                name,
+                email,
+                password,
+            });
+
+            localStorage.setItem("user", JSON.stringify(data));
+            set({ user: data, loading: false });
             toast.success("Signup successful");
+            return data;
         } catch (error) {
-            toast.error("Signup failed");
+            set({ loading: false });
+            toast.error(
+                error.response?.data?.message || "Signup failed"
+            );
+            throw error;
         }
     },
 
     login: async (email, password) => {
         try {
-            const response = await axiosInstance.post("/login", { email, password });
-            set({ user: response.data });
-            toast.success("Login successful");
-        } catch (error) {
+            set({ loading: true });
 
+            const { data } = await axiosInstance.post("/auth/login", {
+                email,
+                password,
+            });
+
+            // 🔥 persist user
+            localStorage.setItem("user", JSON.stringify(data));
+            set({ user: data, loading: false });
+            toast.success("Login successful");
+            return data;
+        } catch (error) {
+            set({ loading: false });
+            toast.error(
+                error.response?.data?.message || "Invalid credentials"
+            );
+            throw error;
         }
     },
-    logout: () => {
+
+    logout: async () => {
+        try {
+            await axiosInstance.post("/auth/logout"); // optional
+        } catch (_) { }
+
+        localStorage.removeItem("user");
         set({ user: null });
         toast.success("Logout successful");
     },

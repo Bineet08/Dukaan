@@ -33,3 +33,7 @@ build/
 
 # Testing
 coverage/
+
+faltu
+
+.forUpdate

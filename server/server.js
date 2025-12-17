@@ -16,6 +16,12 @@ app.use(express.json());
 const productRoutes = require("./src/routes/productRoutes");
 app.use("/api/products", productRoutes);
 
+const userRoutes = require("./src/routes/userRoutes");
+app.use("/api/auth", userRoutes);
+
+const orderRoutes = require("./src/routes/orderRoutes");
+app.use("/api/orders", orderRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
