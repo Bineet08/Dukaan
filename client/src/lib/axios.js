@@ -1,29 +1,23 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL:
-        import.meta.env.MODE === "development"
-            ? "http://localhost:5000/api"
-            : "/api",
-    withCredentials: false // JWT is in header, not cookies
+    baseURL: import.meta.env.VITE_BACKEND_URL,
+    withCredentials: false,
 });
 
-// 🔐 Attach JWT token to every request
+// 🔐 Attach JWT token
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");
-
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-
         return config;
     },
     (error) => Promise.reject(error)
 );
 
-
-// 🚨 Handle expired / invalid token globally
+// 🚨 Handle auth failure
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -31,12 +25,10 @@ axiosInstance.interceptors.response.use(
             localStorage.removeItem("user");
             localStorage.removeItem("token");
 
-            // Avoid infinite redirect loop
             if (!window.location.pathname.includes("/login")) {
                 window.location.href = "/login";
             }
         }
-
         return Promise.reject(error);
     }
 );
