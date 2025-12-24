@@ -38,6 +38,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/upload", uploadRoutes);
 
+
 /* ---------- Health Check ---------- */
 app.get("/health", (_, res) => {
   res.status(200).json({ status: "OK", uptime: process.uptime() });

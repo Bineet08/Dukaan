@@ -27,6 +27,7 @@ const AdminDashboard = () => {
         { title: "Manage Products", path: "/admin/products", icon: "📝", description: "Add, edit, or delete products" },
         { title: "View Orders", path: "/admin/orders", icon: "📋", description: "Manage customer orders" },
         { title: "User Management", path: "/admin/users", icon: "👤", description: "Manage user accounts" },
+        { title: "User Messages", path: "/admin/messages", icon: "✉️", description: "Messages from users" },
     ];
 
     return (

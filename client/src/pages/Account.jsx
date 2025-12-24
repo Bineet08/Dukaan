@@ -61,7 +61,7 @@ const Account = () => {
 
         {user.isAdmin && (
           <Link
-            to="/admin"
+            to="/admin/dashboard"
             className="bg-yellow-50 border rounded-lg p-6 hover:shadow transition"
           >
             <h3 className="font-semibold text-lg mb-2">

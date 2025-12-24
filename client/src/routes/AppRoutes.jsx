@@ -15,6 +15,7 @@ import AdminDashboard from '../pages/AdminDashboard'
 import AdminProducts from '../pages/AdminProducts'
 import AdminUsers from '../pages/AdminUsers'
 import AdminOrders from '../pages/AdminOrders'
+import AdminMessages from '../pages/AdminMessages'
 
 const AppRoutes = () => {
   return (
@@ -61,6 +62,11 @@ const AppRoutes = () => {
       <Route path="/admin/orders" element={
         <AdminRoute>
           <AdminOrders />
+        </AdminRoute>
+      } />
+      <Route path="/admin/messages" element={
+        <AdminRoute>
+          <AdminMessages />
         </AdminRoute>
       } />
     </Routes>

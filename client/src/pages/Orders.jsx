@@ -1,32 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axiosInstance from "../lib/axios";
 import { useUserStore } from "../stores/useUserStore";
 import { toast } from "react-hot-toast";
 
 const Orders = () => {
     const user = useUserStore((state) => state.user);
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    /* =========================
+       FETCH USER ORDERS
+       ========================= */
     useEffect(() => {
-        const fetchOrders = async () => {
-            if (!user) return;
+        if (!user) return;
 
+        const fetchOrders = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${backendUrl}/orders/myorders`, {
-                    headers: {
-                        'Authorization': `Bearer ${user.token}`
-                    }
-                });
 
-                const data = await response.json();
+                const { data } = await axiosInstance.get("/orders/my-orders");
 
-                if (response.ok) {
-                    setOrders(data);
-                } else {
-                    toast.error("Failed to fetch orders");
-                }
+                const ordersArray = Array.isArray(data)
+                    ? data
+                    : data.orders || [];
+
+                setOrders(ordersArray);
             } catch (error) {
                 console.error("Error fetching orders:", error);
                 toast.error("Failed to fetch orders");
@@ -38,10 +37,14 @@ const Orders = () => {
         fetchOrders();
     }, [user]);
 
+
     if (!user) {
-        return null;
+        return null; // route already protected
     }
 
+    /* =========================
+       STATUS COLOR HELPER
+       ========================= */
     const getStatusColor = (status) => {
         switch (status) {
             case "Delivered":
@@ -57,6 +60,9 @@ const Orders = () => {
         }
     };
 
+    /* =========================
+       UI
+       ========================= */
     return (
         <div className="max-w-5xl mx-auto px-4 py-8">
             <h1 className="text-2xl font-bold mb-6">My Orders</h1>
@@ -76,52 +82,78 @@ const Orders = () => {
                             key={order._id}
                             className="border rounded-lg p-4 shadow-sm bg-white"
                         >
+                            {/* Header */}
                             <div className="flex justify-between mb-3">
                                 <span className="font-semibold text-lg">
                                     Order #{order._id.slice(-8).toUpperCase()}
                                 </span>
                                 <span className="text-sm text-gray-500">
-                                    {new Date(order.createdAt).toLocaleDateString('en-IN', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                    })}
+                                    {new Date(order.createdAt).toLocaleDateString(
+                                        "en-IN",
+                                        {
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                        }
+                                    )}
                                 </span>
                             </div>
 
-                            {/* Order Items */}
+                            {/* Items */}
                             <div className="mb-3">
-                                <h3 className="text-sm font-semibold text-gray-700 mb-2">Items:</h3>
+                                <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                                    Items
+                                </h3>
                                 <div className="space-y-1">
                                     {order.items.map((item, index) => (
-                                        <div key={index} className="text-sm text-gray-600 flex justify-between">
-                                            <span>{item.name} × {item.qty}</span>
-                                            <span>₹{item.price * item.qty}</span>
+                                        <div
+                                            key={index}
+                                            className="text-sm text-gray-600 flex justify-between"
+                                        >
+                                            <span>
+                                                {item.name} × {item.qty}
+                                            </span>
+                                            <span>
+                                                ₹{item.price * item.qty}
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Shipping Details */}
+                            {/* Shipping */}
                             {order.shippingAddress && (
-                                <div className="mb-3 text-sm">
-                                    <span className="font-semibold text-gray-700">Address:</span>
-                                    <span className="text-gray-600 ml-2">{order.shippingAddress}</span>
+                                <div className="mb-2 text-sm">
+                                    <span className="font-semibold text-gray-700">
+                                        Address:
+                                    </span>
+                                    <span className="text-gray-600 ml-2">
+                                        {order.shippingAddress}
+                                    </span>
                                 </div>
                             )}
 
                             {order.phoneNumber && (
                                 <div className="mb-3 text-sm">
-                                    <span className="font-semibold text-gray-700">Phone:</span>
-                                    <span className="text-gray-600 ml-2">{order.phoneNumber}</span>
+                                    <span className="font-semibold text-gray-700">
+                                        Phone:
+                                    </span>
+                                    <span className="text-gray-600 ml-2">
+                                        {order.phoneNumber}
+                                    </span>
                                 </div>
                             )}
 
+                            {/* Footer */}
                             <div className="flex justify-between items-center pt-3 border-t">
                                 <span className="font-bold text-lg">
                                     Total: ₹{order.totalAmount}
                                 </span>
-                                <span className={`text-sm font-semibold px-3 py-1 rounded-full ${getStatusColor(order.status)}`}>
+                                <span
+                                    className={`text-sm font-semibold px-3 py-1 rounded-full ${getStatusColor(
+                                        order.status
+                                    )}`}
+                                >
                                     {order.status}
                                 </span>
                             </div>
