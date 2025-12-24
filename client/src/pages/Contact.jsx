@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Send } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { MapPin, Phone, Mail, Send } from "lucide-react";
+import axiosInstance from "../lib/axios";
+import toast from "react-hot-toast";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
+    name: "",
+    email: "",
+    message: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate form submission
-    console.log('Form submitted:', formData);
-    toast.success('Message sent successfully!');
-    setFormData({ name: '', email: '', message: '' });
+    setLoading(true);
+
+    try {
+      await axiosInstance.post("/contact", formData);
+      toast.success("Message sent successfully!");
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to send message"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,122 +44,81 @@ const Contact = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Contact Information */}
+        {/* Contact Info */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">Contact Information</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+              Contact Information
+            </h2>
 
             <div className="space-y-8">
-              <div className="flex items-start space-x-4">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <MapPin className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Address</h3>
-                  <p className="text-gray-600 mt-1">
-                    123 Innovation Drive<br />
-                    Tech Valley, CA 94043<br />
-                    United States
-                  </p>
-                </div>
-              </div>
+              <Info icon={<MapPin />} title="Address">
+                Sadhan, Ramgarh<br />Chandauli<br />Uttar Pradesh
+              </Info>
 
-              <div className="flex items-start space-x-4">
-                <div className="bg-green-100 p-3 rounded-full">
-                  <Phone className="w-6 h-6 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Phone</h3>
-                  <p className="text-gray-600 mt-1">+1 (555) 123-4567</p>
-                  <p className="text-sm text-gray-500 mt-1">Mon-Fri 9am-6pm PST</p>
-                </div>
-              </div>
+              <Info icon={<Phone />} title="Phone">
+                +91 XXXXX XXXXX
+              </Info>
 
-              <div className="flex items-start space-x-4">
-                <div className="bg-purple-100 p-3 rounded-full">
-                  <Mail className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Email</h3>
-                  <p className="text-gray-600 mt-1">support@dukaan.com</p>
-                  <p className="text-gray-600">info@dukaan.com</p>
-                </div>
-              </div>
+              <Info icon={<Mail />} title="Email">
+                support@dukaan.com
+              </Info>
             </div>
           </div>
 
-          <div className="bg-gray-50 p-8 h-full">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3506.1191402220793!2d77.39832237612198!3d28.506062889758525!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce626851f7009%3A0x621185133cfd1ad1!2sGeeksforGeeks!5e0!3m2!1sen!2sin!4v1703666579040!5m2!1sen!2sin"
-              width="100%"
-              height="200"
-              style={{ border: 0, borderRadius: "0.5rem" }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Office Location"
-            ></iframe>
-          </div>
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d900.3769136409968!2d83.24060122904596!3d25.48811065016932!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x398e210d7e901b1f%3A0x5567f302608cfca6!2sGupta%20General%20Store!5e0!3m2!1sen!2sin!4v1766570691621!5m2!1sen!2sin"
+            className="w-full h-60 border-0"
+            loading="lazy"
+            title="Location"
+          />
         </div>
 
         {/* Contact Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Send us a Message</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">
+            Send us a Message
+          </h2>
+
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                placeholder="John Doe"
-              />
-            </div>
+            <Input
+              label="Full Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter your full name"
+            />
+            <Input
+              label="Email Address"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email address"
+            />
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                placeholder="john@example.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Message
               </label>
               <textarea
-                id="message"
                 name="message"
+                rows="5"
+                required
                 value={formData.message}
                 onChange={handleChange}
-                required
-                rows="5"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
+                className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 resize-none"
                 placeholder="How can we help you?"
-              ></textarea>
+              />
             </div>
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50"
             >
               <Send className="w-5 h-5" />
-              <span>Send Message</span>
+              {loading ? "Sending..." : "Send Message"}
             </button>
           </form>
         </div>
@@ -156,5 +126,30 @@ const Contact = () => {
     </div>
   );
 };
+
+const Info = ({ icon, title, children }) => (
+  <div className="flex items-start space-x-4">
+    <div className="bg-blue-100 p-3 rounded-full text-blue-600">
+      {icon}
+    </div>
+    <div>
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <p className="text-gray-600">{children}</p>
+    </div>
+  </div>
+);
+
+const Input = ({ label, ...props }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      {label}
+    </label>
+    <input
+      required
+      className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500"
+      {...props}
+    />
+  </div>
+);
 
 export default Contact;

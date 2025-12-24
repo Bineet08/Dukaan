@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
+import axiosInstance from "../lib/axios";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -7,27 +8,28 @@ const Products = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/products");
+        const { data } = await axiosInstance.get("/products");
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch products");
-        }
+        if (!isMounted) return;
 
-        const data = await res.json();
-
-        // 🔑 THIS LINE MATCHES YOUR BACKEND
-        setProducts(data.products);
+        setProducts(data.products || []);
       } catch (err) {
-        console.error(err);
-        setError("Unable to load products");
+        console.error("FETCH PRODUCTS ERROR:", err);
+        if (isMounted) setError("Unable to load products");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchProducts();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -35,7 +37,11 @@ const Products = () => {
   }
 
   if (error) {
-    return <div className="text-center py-20 text-red-500">{error}</div>;
+    return (
+      <div className="text-center py-20 text-red-500">
+        {error}
+      </div>
+    );
   }
 
   return (

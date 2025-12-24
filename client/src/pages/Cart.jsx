@@ -3,12 +3,12 @@ import { useUserStore } from "../stores/useUserStore";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../lib/axios";
 
 const Cart = () => {
     const { cartItems, removeFromCart, clearCart } = useCart();
     const user = useUserStore((state) => state.user);
     const navigate = useNavigate();
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const [showCheckoutModal, setShowCheckoutModal] = useState(false);
     const [shippingAddress, setShippingAddress] = useState("");
@@ -33,39 +33,29 @@ const Cart = () => {
 
         try {
             const orderData = {
-                items: cartItems.map(item => ({
+                items: cartItems.map((item) => ({
                     product: item._id,
                     name: item.name,
                     qty: item.qty,
-                    price: item.newPrice
+                    price: item.newPrice,
                 })),
                 totalAmount: total,
                 shippingAddress,
-                phoneNumber
+                phoneNumber,
             };
 
-            const response = await fetch(`${backendUrl}/orders`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${user.token}`
-                },
-                body: JSON.stringify(orderData)
-            });
+            // Use axiosInstance — it already attaches Authorization header
+            await axiosInstance.post("/orders", orderData);
 
-            const data = await response.json();
-
-            if (response.ok) {
-                toast.success("Order placed successfully!");
-                clearCart();
-                setShowCheckoutModal(false);
-                navigate("/orders");
-            } else {
-                toast.error(data.error || "Failed to place order");
-            }
+            toast.success("Order placed successfully!");
+            clearCart();
+            setShowCheckoutModal(false);
+            navigate("/orders");
         } catch (error) {
-            console.error("Error placing order:", error);
-            toast.error("Failed to place order");
+            console.error("PLACE ORDER ERROR:", error);
+            toast.error(
+                error.response?.data?.error || "Failed to place order"
+            );
         } finally {
             setIsPlacingOrder(false);
         }
@@ -142,6 +132,7 @@ const Cart = () => {
                                     placeholder="Enter your complete shipping address"
                                 />
                             </div>
+
                             <div className="mb-4">
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
                                     Phone Number *
@@ -155,6 +146,7 @@ const Cart = () => {
                                     placeholder="Enter your phone number"
                                 />
                             </div>
+
                             <div className="bg-gray-50 p-3 rounded mb-6">
                                 <div className="flex justify-between text-sm mb-1">
                                     <span>Items:</span>
@@ -165,6 +157,7 @@ const Cart = () => {
                                     <span>₹{total}</span>
                                 </div>
                             </div>
+
                             <div className="flex gap-3">
                                 <button
                                     type="submit"

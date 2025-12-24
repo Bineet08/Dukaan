@@ -4,28 +4,34 @@ import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
 
 const Settings = () => {
-    const { user, setUser } = useUserStore();
+    const { user, token, setAuth } = useUserStore();
 
     const [name, setName] = useState(user?.name || "");
     const [email, setEmail] = useState(user?.email || "");
     const [loading, setLoading] = useState(false);
 
-    if (!user) {
-        return null; // protected route already guards this
-    }
+    if (!user) return null;
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            const { data } = await axiosInstance.put("/users/profile", {
+            const { data } = await axiosInstance.put("/auth/profile", {
                 name,
                 email,
             });
 
-            // update global auth state
-            setUser(data);
+            // ✅ keep token, update user cleanly
+            setAuth(
+                {
+                    id: data._id,
+                    name: data.name,
+                    email: data.email,
+                    isAdmin: data.isAdmin,
+                },
+                token
+            );
 
             toast.success("Profile updated successfully");
         } catch (error) {
@@ -71,7 +77,6 @@ const Settings = () => {
                         />
                     </div>
 
-                    {/* Submit */}
                     <div className="pt-4">
                         <button
                             type="submit"
@@ -87,15 +92,12 @@ const Settings = () => {
                 </form>
             </div>
 
-            {/* Future Settings */}
+            {/* Security */}
             <div className="mt-8 bg-gray-50 border rounded-lg p-6">
                 <h2 className="text-lg font-semibold mb-4">Security</h2>
-
                 <p className="text-sm text-gray-600 mb-3">
-                    Password change and advanced security settings will be available
-                    soon.
+                    Password change and advanced security settings will be available soon.
                 </p>
-
                 <button
                     disabled
                     className="px-4 py-2 text-sm rounded bg-gray-300 text-gray-600 cursor-not-allowed"

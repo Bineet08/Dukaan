@@ -1,33 +1,48 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useUserStore } from '../stores/useUserStore'
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useUserStore } from "../stores/useUserStore";
 
 const AdminDashboard = () => {
-    const user = useUserStore((state) => state.user)
+    const user = useUserStore((state) => state.user);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+            navigate("/login");
+            return;
+        }
+        if (!user.isAdmin) {
+            navigate("/");
+        }
+    }, [user, navigate]);
 
     const stats = [
-        { title: 'Total Products', value: '--', icon: '📦', color: 'bg-blue-500' },
-        { title: 'Total Orders', value: '--', icon: '🛒', color: 'bg-green-500' },
-        { title: 'Total Users', value: '--', icon: '👥', color: 'bg-purple-500' },
-        { title: 'Revenue', value: '--', icon: '💰', color: 'bg-yellow-500' },
-    ]
+        { title: "Total Products", value: "--", icon: "📦", color: "bg-blue-500" },
+        { title: "Total Orders", value: "--", icon: "🛒", color: "bg-green-500" },
+        { title: "Total Users", value: "--", icon: "👥", color: "bg-purple-500" },
+        { title: "Revenue", value: "--", icon: "💰", color: "bg-yellow-500" },
+    ];
 
     const quickActions = [
-        { title: 'Manage Products', path: '/admin/products', icon: '📝', description: 'Add, edit, or delete products' },
-        { title: 'View Orders', path: '/admin/orders', icon: '📋', description: 'Manage customer orders' },
-        { title: 'User Management', path: '/admin/users', icon: '👤', description: 'Manage user accounts' },
-    ]
+        { title: "Manage Products", path: "/admin/products", icon: "📝", description: "Add, edit, or delete products" },
+        { title: "View Orders", path: "/admin/orders", icon: "📋", description: "Manage customer orders" },
+        { title: "User Management", path: "/admin/users", icon: "👤", description: "Manage user accounts" },
+    ];
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="container mx-auto px-4">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
-                    <p className="text-gray-600">Welcome back, {user?.name}!</p>
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                        Admin Dashboard
+                    </h1>
+                    <p className="text-gray-600">
+                        Welcome back, {user?.name || "Admin"}!
+                    </p>
                 </div>
 
-                {/* Stats Grid */}
+                {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     {stats.map((stat, index) => (
                         <div key={index} className="bg-white rounded-lg shadow-md p-6">
@@ -66,14 +81,16 @@ const AdminDashboard = () => {
 
                 {/* Recent Activity */}
                 <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Recent Activity</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                        Recent Activity
+                    </h2>
                     <div className="text-center py-8 text-gray-500">
-                        <p>No recent activity to display</p>
+                        No recent activity to display
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default AdminDashboard
+export default AdminDashboard;

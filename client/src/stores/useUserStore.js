@@ -3,13 +3,27 @@ import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
 
 export const useUserStore = create((set) => ({
-    // 🔥 hydrate from localStorage
-    user: JSON.parse(localStorage.getItem("user")) || null,
+    // 🔐 hydrate safely
+    user: (() => {
+        try {
+            return JSON.parse(localStorage.getItem("user"));
+        } catch {
+            return null;
+        }
+    })(),
+    token: localStorage.getItem("token"),
     loading: false,
 
-    setUser: (user) => {
+    setAuth: (user, token) => {
         localStorage.setItem("user", JSON.stringify(user));
-        set({ user });
+        localStorage.setItem("token", token);
+        set({ user, token });
+    },
+
+    clearAuth: () => {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        set({ user: null, token: null });
     },
 
     register: async (name, email, password, confirmPassword) => {
@@ -27,15 +41,29 @@ export const useUserStore = create((set) => ({
                 password,
             });
 
-            localStorage.setItem("user", JSON.stringify(data));
-            set({ user: data, loading: false });
+            const user = {
+                id: data._id,
+                email: data.email,
+                name: data.name,
+                isAdmin: data.isAdmin,
+            };
+
+            set((state) => ({
+                ...state,
+                loading: false,
+                user,
+                token: data.token,
+            }));
+
+            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("token", data.token);
+
             toast.success("Signup successful");
             return data;
+
         } catch (error) {
             set({ loading: false });
-            toast.error(
-                error.response?.data?.message || "Signup failed"
-            );
+            toast.error(error.response?.data?.message || "Signup failed");
             throw error;
         }
     },
@@ -49,27 +77,36 @@ export const useUserStore = create((set) => ({
                 password,
             });
 
-            // 🔥 persist user
-            localStorage.setItem("user", JSON.stringify(data));
-            set({ user: data, loading: false });
+            const user = {
+                id: data._id,
+                email: data.email,
+                name: data.name,
+                isAdmin: data.isAdmin,
+            };
+
+            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("token", data.token);
+
+            set({
+                user,
+                token: data.token,
+                loading: false,
+            });
+
             toast.success("Login successful");
             return data;
+
         } catch (error) {
             set({ loading: false });
-            toast.error(
-                error.response?.data?.message || "Invalid credentials"
-            );
+            toast.error(error.response?.data?.message || "Invalid credentials");
             throw error;
         }
     },
 
-    logout: async () => {
-        try {
-            await axiosInstance.post("/auth/logout"); // optional
-        } catch (_) { }
-
+    logout: () => {
         localStorage.removeItem("user");
-        set({ user: null });
+        localStorage.removeItem("token");
+        set({ user: null, token: null });
         toast.success("Logout successful");
     },
 }));

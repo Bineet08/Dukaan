@@ -8,21 +8,25 @@ const Login = () => {
   const [error, setError] = useState("");
 
   const login = useUserStore((state) => state.login);
+  const loading = useUserStore((state) => state.loading);
+
   const location = useLocation();
   const navigate = useNavigate();
 
   const from = location.state?.from || "/";
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      await login(email, password); // assume async
-      navigate(from, { replace: true }); // 🔁 redirect after login
+      await login(email, password);
+      navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || "Invalid credentials");
+      setError(
+        err?.response?.data?.message ||
+        "Invalid email or password"
+      );
     }
   };
 
@@ -71,9 +75,10 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full py-2 text-white bg-indigo-600 rounded hover:bg-indigo-700"
+            disabled={loading}
+            className="w-full py-2 text-white bg-indigo-600 rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign in
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
       </div>

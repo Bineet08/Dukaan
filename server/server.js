@@ -1,31 +1,20 @@
-const express = require("express");
-const cors = require("cors");
-process.env.NODE_ENV !== "production" && require("dotenv").config();
-const connectDB = require("./src/config/db.js");
+const http = require("http");
+const app = require("./app");
+const connectDB = require("./src/config/db");
 
-const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect Database
+(async () => {
+  try {
+    await connectDB();
+    const server = http.createServer(app);
 
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
 
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
-app.use(express.json());
-
-// Routes
-const productRoutes = require("./src/routes/productRoutes");
-app.use("/api/products", productRoutes);
-
-const userRoutes = require("./src/routes/userRoutes");
-app.use("/api/auth", userRoutes);
-
-const orderRoutes = require("./src/routes/orderRoutes");
-app.use("/api/orders", orderRoutes);
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  connectDB();
-});
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
+})();
