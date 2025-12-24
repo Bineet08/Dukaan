@@ -19,9 +19,9 @@ router.post("/login", loginUser);
 router.put("/profile", protect, updateProfile);
 
 // Admin routes
-router.get("/users", protect, admin, getAllUsers);   // ✅ FIX
-router.get("/users/:id", protect, admin, getUserById);
-router.put("/users/:id", protect, admin, updateUser);
-router.delete("/users/:id", protect, admin, deleteUser);
+router.get("/", protect, admin, getAllUsers);   // ✅ FIX
+router.get("/:id", protect, admin, getUserById);
+router.put("/:id", protect, admin, updateUser);
+router.delete("/:id", protect, admin, deleteUser);
 
 module.exports = router;

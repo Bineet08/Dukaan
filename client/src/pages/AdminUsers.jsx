@@ -39,7 +39,7 @@ const AdminUsers = () => {
             setLoading(true);
 
             const { data } = await axiosInstance.get(
-                `/auth/users?page=${pageNo}&limit=${USERS_PER_PAGE}`
+                `/auth?page=${pageNo}&limit=${USERS_PER_PAGE}`
             );
 
             setUsers(data.users || data); // supports both paginated & flat response
