@@ -130,6 +130,16 @@ const Header = () => {
                 Settings
               </button>
 
+              {/* Admin Link */}
+              {user?.isAdmin && (
+                <button
+                  onClick={() => handleMenuClick("/admin/dashboard")}
+                  className="dropdown-btn text-blue-600 hover:bg-blue-50 border-t"
+                >
+                  🔧 Admin Panel
+                </button>
+              )}
+
               <div className="border-t">
                 {user ? (
                   <button

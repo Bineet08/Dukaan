@@ -32,14 +32,33 @@ const products = [
     }
 ];
 
+const users = [
+    {
+        name: "Admin User",
+        email: "admin@dukaan.com",
+        password: "admin123",
+        isAdmin: true
+    },
+    {
+        name: "Regular User",
+        email: "user@dukaan.com",
+        password: "user123",
+        isAdmin: false
+    }
+];
+
 const importData = async () => {
     try {
         await Product.deleteMany();
         await User.deleteMany();
 
         await Product.insertMany(products);
+        await User.insertMany(users);
 
-        console.log("Data Imported!");
+        console.log("✅ Data Imported!");
+        console.log("\n📋 Sample Users Created:");
+        console.log("Admin: admin@dukaan.com / admin123");
+        console.log("User:  user@dukaan.com / user123");
         process.exit();
     } catch (error) {
         console.error(`${error}`);
