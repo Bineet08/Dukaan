@@ -37,6 +37,7 @@ const Login = () => {
           Or{" "}
           <Link
             to="/register"
+            state={{ from }}
             className="text-indigo-600 hover:text-indigo-500"
           >
             create a new account

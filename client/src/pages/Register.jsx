@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/useUserStore';
 
 const Register = () => {
@@ -9,11 +9,19 @@ const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
 
     const { register, user } = useUserStore();
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const from = location.state?.from || "/";
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle registration logic here
-        register(name, email, password, confirmPassword);
+        try {
+            await register(name, email, password, confirmPassword);
+            navigate(from, { replace: true });
+        } catch (error) {
+            // Error is handled by toast in useUserStore
+        }
     };
 
     return (
