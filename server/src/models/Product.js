@@ -33,6 +33,7 @@ const productSchema = new mongoose.Schema(
                 "home",
                 "beauty",
                 "sports",
+                "medicine",
                 "books",
                 "other"
             ],
@@ -66,7 +67,7 @@ const productSchema = new mongoose.Schema(
         isActive: {
             type: Boolean,
             default: true,
-            index: true
+            // index: true
         }
     },
     {

@@ -19,7 +19,7 @@ router.get("/:id", getProductById);    // GET product by ID
 /* =========================
    ADMIN ROUTES
    ========================= */
-router.post("/", protect, admin, addProduct);       // CREATE product
+router.post("/add", protect, admin, addProduct);       // CREATE product
 router.put("/:id", protect, admin, updateProduct); // UPDATE product
 router.delete("/:id", protect, admin, deleteProduct); // DELETE product
 

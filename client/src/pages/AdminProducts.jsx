@@ -4,6 +4,18 @@ import axiosInstance from "../lib/axios";
 import { useUserStore } from "../stores/useUserStore";
 import { useNavigate } from "react-router-dom";
 
+const categories = [
+    "electronics",
+    "fashion",
+    "grocery",
+    "home",
+    "beauty",
+    "sports",
+    "books",
+    "other"
+]
+
+
 const AdminProducts = () => {
     const { user } = useUserStore();
     const navigate = useNavigate();
@@ -15,7 +27,7 @@ const AdminProducts = () => {
     const [editingProduct, setEditingProduct] = useState(null);
 
     const [imageFile, setImageFile] = useState(null);
-    const [imageMode, setImageMode] = useState("upload"); // upload | url
+    const [imageMode, setImageMode] = useState("upload");
     const [imageUrlInput, setImageUrlInput] = useState("");
 
     const [formData, setFormData] = useState({
@@ -241,14 +253,25 @@ const AdminProducts = () => {
                                 className="border py-2 px-5 rounded-2xl w-full "
                                 required
                             />
-                            <input
+
+                            <select
                                 name="category"
-                                placeholder="Category"
                                 value={formData.category}
                                 onChange={handleChange}
-                                className="border py-2 px-5 rounded-2xl w-full "
+                                className="border py-2 px-5 rounded-2xl w-full bg-white"
                                 required
-                            />
+                            >
+                                <option value="" disabled>
+                                    Select category
+                                </option>
+
+                                {categories.map((category) => (
+                                    <option key={category} value={category}>
+                                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                                    </option>
+                                ))}
+                            </select>
+
                             <input
                                 type="number"
                                 name="originalPrice"
@@ -269,8 +292,9 @@ const AdminProducts = () => {
                             />
 
                             {/* IMAGE MODE */}
+                            {/* IMAGE MODE */}
                             <div className="flex gap-4 mt-2">
-                                <label className="flex items-center gap-2 ">
+                                <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
                                         checked={imageMode === "upload"}
@@ -278,6 +302,7 @@ const AdminProducts = () => {
                                     />
                                     Upload Image
                                 </label>
+
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
@@ -288,22 +313,24 @@ const AdminProducts = () => {
                                 </label>
                             </div>
 
-                            {imageMode === "upload" ? (
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setImageFile(e.target.files[0])}
-                                    className="border p-2 rounded-2xl w-full "
-                                />
-                            ) : (
-                                <input
-                                    type="url"
-                                    placeholder="https://example.com/image.jpg"
-                                    value={imageUrlInput}
-                                    onChange={(e) => setImageUrlInput(e.target.value)}
-                                    className="border p-2 rounded-2xl w-full "
-                                />
-                            )}
+                            {/* FILE INPUT (always mounted) */}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                                className={`border p-2 rounded-2xl w-full ${imageMode === "upload" ? "block" : "hidden"
+                                    }`}
+                            />
+
+                            {/* URL INPUT (always mounted & controlled) */}
+                            <input
+                                type="url"
+                                placeholder="https://example.com/image.jpg"
+                                value={imageUrlInput ?? ""}
+                                onChange={(e) => setImageUrlInput(e.target.value)}
+                                className={`border p-2 rounded-2xl w-full ${imageMode === "url" ? "block" : "hidden"
+                                    }`}
+                            />
 
                             <div className="flex gap-3 pt-2">
                                 <button className="bg-green-600 text-white px-4 py-2 rounded flex-1">
