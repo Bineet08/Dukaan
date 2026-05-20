@@ -3,7 +3,13 @@ const mongoose = require("mongoose");
 
 
 const connectDB = async (retries = 5, delayMs = 5000) => {
-    const mongoUrl = (process.env.MONGODB_URL || "").replace(/['"]/g, "");
+    const mongoUrlRaw = (process.env.MONGODB_URL || "").replace(/['"]/g, "");
+    const defaultDb = 'dukaan';
+    let mongoUrl = mongoUrlRaw;
+    // If the provided URL does not include a database path, append the default DB
+    if (mongoUrlRaw && !/\/[^\/\?]+(\?|$)/.test(mongoUrlRaw)) {
+        mongoUrl = `${mongoUrlRaw.replace(/\/+$/,'')}/${defaultDb}`;
+    }
 
     mongoose.connection.on('connected', () =>
         console.log('MONGODB CONNECTED'));
@@ -14,7 +20,8 @@ const connectDB = async (retries = 5, delayMs = 5000) => {
     for (let i = 1; i <= retries; i++) {
         try {
             console.log(`Connecting to MongoDB... (Attempt ${i}/${retries})`);
-            await mongoose.connect(`${mongoUrl}/dukaan`, {
+            console.log('Using MongoDB URL:', mongoUrl);
+            await mongoose.connect(mongoUrl, {
                 serverSelectionTimeoutMS: 5000
             });
             return;
