@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
 
-export const useUserStore = create((set) => ({
+export const useUserStore = create((set, get) => ({
     // 🔐 hydrate safely
     user: (() => {
         try {
@@ -14,6 +14,9 @@ export const useUserStore = create((set) => ({
     token: localStorage.getItem("token"),
     loading: false,
 
+    // FIX BUG-14: single source of truth for persisting auth state.
+    // register() and login() now both call setAuth() instead of
+    // duplicating localStorage + set() logic independently.
     setAuth: (user, token) => {
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("token", token);
@@ -48,15 +51,9 @@ export const useUserStore = create((set) => ({
                 isAdmin: data.isAdmin,
             };
 
-            set((state) => ({
-                ...state,
-                loading: false,
-                user,
-                token: data.token,
-            }));
-
-            localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("token", data.token);
+            // FIX BUG-14: use setAuth instead of duplicating state + localStorage logic
+            get().setAuth(user, data.token);
+            set({ loading: false });
 
             toast.success("Signup successful");
             return data;
@@ -84,14 +81,9 @@ export const useUserStore = create((set) => ({
                 isAdmin: data.isAdmin,
             };
 
-            localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("token", data.token);
-
-            set({
-                user,
-                token: data.token,
-                loading: false,
-            });
+            // FIX BUG-14: use setAuth instead of duplicating state + localStorage logic
+            get().setAuth(user, data.token);
+            set({ loading: false });
 
             toast.success("Login successful");
             return data;

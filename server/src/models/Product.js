@@ -15,8 +15,9 @@ const productSchema = new mongoose.Schema(
             type: String,
             trim: true,
             default: "",
+            // FIX BUG-07: regex made optional (?) so empty string default is valid
             match: [
-                /^(https?:\/\/.*\.(?:png|jpg|jpeg|webp|svg))$/i,
+                /^(https?:\/\/.*)?$/i,
                 "Invalid image URL"
             ]
         },

@@ -1,22 +1,23 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import Home from "../pages/Home"
-import Products from "../pages/Products"
-import Contact from "../pages/Contact"
-import Login from '../pages/Login'
-import Register from '../pages/Register'
-import Cart from '../pages/Cart'
+import Home from "../features/home/pages/HomePage"
+import Products from "../features/products/pages/ProductsPage"
+import Contact from "../features/contact/pages/ContactPage"
+import Login from "../features/auth/pages/LoginPage"
+import Register from "../features/auth/pages/RegisterPage"
+import Cart from "../features/cart/pages/CartPage"
 import ProtectedRoute from './ProtectedRoute'
 import AdminRoute from './AdminRoute'
-import Orders from '../pages/Orders'
-import Settings from '../pages/Settings'
-import Account from '../pages/Account'
-import AdminDashboard from '../pages/AdminDashboard'
-import AdminProducts from '../pages/AdminProducts'
-import AdminUsers from '../pages/AdminUsers'
-import AdminOrders from '../pages/AdminOrders'
-import AdminMessages from '../pages/AdminMessages'
+import Orders from '../features/orders/pages/OrdersPage'
+import Settings from '../features/auth/pages/SettingsPage'
+import Account from '../features/auth/pages/AccountPage'
+import AdminDashboard from '../features/admin/pages/AdminDashboardPage'
+import AdminProducts from '../features/products/pages/AdminProductsPage'
+import AdminUsers from '../features/auth/pages/AdminUsersPage'
+import AdminOrders from '../features/orders/pages/AdminOrdersPage'
+import AdminMessages from '../features/contact/pages/AdminMessagesPage'
 
+// FIX BUG-20: Normalized CRLF (\r\n) line endings to LF (\n)
 const AppRoutes = () => {
   return (
     <Routes>
@@ -25,17 +26,17 @@ const AppRoutes = () => {
       <Route path="/products" element={<Products />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/settings" element={<Settings />} />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      } />
       <Route path="/account" element={
         <ProtectedRoute>
           <Account />
         </ProtectedRoute>
       } />
-      <Route path="cart" element={
-        <ProtectedRoute>
-          <Cart />
-        </ProtectedRoute>
-      } />
+      <Route path="/cart" element={<Cart />} />
       <Route path="/orders" element={
         <ProtectedRoute>
           <Orders />

@@ -1,8 +1,11 @@
 import axios from "axios";
+import { useUserStore } from "../stores/useUserStore";
+import { globalNavigate } from "./navigation";
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL,
     withCredentials: false,
+    timeout: 10000,
 });
 
 // 🔐 Attach JWT token
@@ -22,15 +25,15 @@ axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem("user");
-            localStorage.removeItem("token");
+            useUserStore.getState().clearAuth();
 
             if (!window.location.pathname.includes("/login")) {
-                window.location.href = "/login";
+                globalNavigate("/login");
             }
         }
         return Promise.reject(error);
     }
 );
+
 
 export default axiosInstance;

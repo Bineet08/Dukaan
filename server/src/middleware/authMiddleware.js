@@ -2,9 +2,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const protect = async (req, res, next) => {
-  // console.log("AUTH HEADER:", req.headers.authorization);
-
   try {
+    // NOTE: x-user-id bypass removed (BUG-05) — was a security vulnerability
     let token;
 
     if (
@@ -17,7 +16,8 @@ const protect = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Authentication required"
+        message: "Authentication required",
+        error: "Authentication required"
       });
     }
 
@@ -26,26 +26,30 @@ const protect = async (req, res, next) => {
     if (!decoded || !decoded.id) {
       return res.status(401).json({
         success: false,
-        message: "Invalid token payload"
+        message: "Invalid token payload",
+        error: "Invalid token payload"
       });
     }
 
     const user = await User.findById(decoded.id)
       .select("-password")
-      .lean(); // 🔥 faster, immutable
+      .lean();
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "User no longer exists"
+        message: "User no longer exists",
+        error: "User no longer exists"
       });
     }
 
-    // Optional: token invalidation support
-    if (user.tokenVersion && decoded.tokenVersion !== user.tokenVersion) {
+    // FIX BUG-13: tokenVersion 0 is falsy in JS — old check skipped validation
+    // for ALL new users. Now uses explicit undefined check.
+    if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== user.tokenVersion) {
       return res.status(401).json({
         success: false,
-        message: "Token revoked"
+        message: "Token revoked",
+        error: "Token revoked"
       });
     }
 
@@ -61,27 +65,24 @@ const protect = async (req, res, next) => {
 
     res.status(401).json({
       success: false,
-      message
+      message,
+      error: message
     });
   }
 };
 
-const admin = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({
-      success: false,
-      message: "Authentication required"
-    });
-  }
-
-  if (!req.user.isAdmin) {
+// FIX BUG-16: 'admin' function was dead code — no routes used it.
+// All admin routes use 'adminOnly'. Removed to avoid confusion.
+const adminOnly = (req, res, next) => {
+  if (!req.user?.isAdmin) {
     return res.status(403).json({
       success: false,
-      message: "Admin access required"
+      message: "Admin only",
+      error: "Admin only"
     });
   }
 
   next();
 };
 
-module.exports = { protect, admin };
+module.exports = { protect, adminOnly };

@@ -11,17 +11,24 @@ const {
     updateProfile
 } = require("../controllers/userController");
 
-const { protect, admin } = require("../middleware/authMiddleware");
+const { protect, adminOnly } = require("../middleware/authMiddleware");
+const validate = require("../middleware/validate");
+const {
+    registerSchema,
+    loginSchema,
+    updateProfileSchema,
+    adminUpdateUserSchema
+} = require("../validators/userValidators");
 
 // Public routes
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.put("/profile", protect, updateProfile);
+router.post("/register", validate(registerSchema), registerUser);
+router.post("/login", validate(loginSchema), loginUser);
+router.put("/profile", protect, validate(updateProfileSchema), updateProfile);
 
 // Admin routes
-router.get("/", protect, admin, getAllUsers);   // ✅ FIX
-router.get("/:id", protect, admin, getUserById);
-router.put("/:id", protect, admin, updateUser);
-router.delete("/:id", protect, admin, deleteUser);
+router.get("/", protect, adminOnly, getAllUsers);
+router.get("/:id", protect, adminOnly, getUserById);
+router.put("/:id", protect, adminOnly, validate(adminUpdateUserSchema), updateUser);
+router.delete("/:id", protect, adminOnly, deleteUser);
 
 module.exports = router;

@@ -3,12 +3,19 @@
  * Tests the actual API endpoints with different authorization scenarios
  */
 
-const testAdminAPI = async () => {
-    const backendUrl = "http://localhost:5000"; // Adjust if your port is different
+const mongoose = require("mongoose");
+const User = require("./src/models/User");
+require("dotenv").config();
 
-    // IDs from the previous test
-    const adminId = "694a894df5692d465ed7f39c";  // Replace with actual admin ID
-    const regularUserId = "694a894df5692d465ed7f39d";  // Replace with actual user ID
+const testAdminAPI = async () => {
+    const backendUrl = "http://localhost:5000";
+
+    await mongoose.connect(`${process.env.MONGODB_URL}/dukaan`);
+    const adminUser = await User.findOne({ email: "admin@dukaan.com" });
+    const regularUser = await User.findOne({ email: "user@dukaan.com" });
+
+    const adminId = adminUser._id.toString();
+    const regularUserId = regularUser._id.toString();
 
     console.log("\n🧪 Testing Admin API Endpoints\n");
     console.log("=".repeat(60));
@@ -16,7 +23,7 @@ const testAdminAPI = async () => {
     // Test product data
     const testProduct = {
         name: "Test Product",
-        category: "Test Category",
+        category: "other",
         originalPrice: 100,
         newPrice: 80,
         image: "https://via.placeholder.com/150"
@@ -171,6 +178,7 @@ const testAdminAPI = async () => {
     console.log("  • Regular users cannot perform admin actions (403)");
     console.log("  • Admin users can perform all CRUD operations (200/201)");
     console.log("=".repeat(60) + "\n");
+    await mongoose.connection.close();
 };
 
 // Run the test

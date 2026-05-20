@@ -1,116 +1,46 @@
-const Order = require("../models/Order");
 const mongoose = require("mongoose");
+const orderService = require("../services/orderService");
 
 /* =========================
    CREATE ORDER (USER)
    ========================= */
 const createOrder = async (req, res) => {
-    try {
-        const { items, totalAmount, shippingAddress, phoneNumber } = req.body;
-        const userId = req.user._id;
+    const order = await orderService.createOrder(req.user._id, req.body);
 
-        if (!items || !Array.isArray(items) || items.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Order must contain at least one item"
-            });
-        }
-
-        if (!totalAmount || totalAmount <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid total amount"
-            });
-        }
-
-        if (!shippingAddress || !phoneNumber) {
-            return res.status(400).json({
-                success: false,
-                message: "Shipping address and phone number are required"
-            });
-        }
-
-        const order = await Order.create({
-            user: userId,
-            items,
-            totalAmount,
-            shippingAddress,
-            phoneNumber,
-            status: "Pending"
-        });
-
-        res.status(201).json({
-            success: true,
-            order
-        });
-
-    } catch (error) {
-        console.error("CREATE ORDER ERROR:", error);
-        res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
+    res.status(201).json({
+        success: true,
+        order
+    });
 };
 
 /* =========================
    GET LOGGED-IN USER ORDERS
    ========================= */
 const getUserOrders = async (req, res) => {
-    try {
-        const orders = await Order.find({ user: req.user._id })
-            .sort({ createdAt: -1 })
-            .populate("items.product")
-            .lean();
+    const orders = await orderService.getUserOrders(req.user._id);
 
-        res.status(200).json({
-            success: true,
-            orders
-        });
-
-    } catch (error) {
-        console.error("GET USER ORDERS ERROR:", error);
-        res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
+    res.status(200).json({
+        success: true,
+        orders
+    });
 };
 
 /* =========================
    ADMIN: GET ALL ORDERS
    ========================= */
 const getAllOrders = async (req, res) => {
-    try {
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 20;
-        const skip = (page - 1) * limit;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
 
-        const orders = await Order.find({})
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate("user", "name email")
-            .populate("items.product")
-            .lean();
+    const { orders, total, totalPages } = await orderService.getAllOrders(page, limit);
 
-        const total = await Order.countDocuments();
-
-        res.status(200).json({
-            success: true,
-            page,
-            totalPages: Math.ceil(total / limit),
-            totalOrders: total,
-            orders
-        });
-
-    } catch (error) {
-        console.error("GET ALL ORDERS ERROR:", error);
-        res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
+    res.status(200).json({
+        success: true,
+        page,
+        totalPages,
+        totalOrders: total,
+        orders
+    });
 };
 
 /* =========================
@@ -120,14 +50,6 @@ const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatuses = [
-        "Pending",
-        "Processing",
-        "Shipped",
-        "Delivered",
-        "Cancelled"
-    ];
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({
             success: false,
@@ -135,43 +57,26 @@ const updateOrderStatus = async (req, res) => {
         });
     }
 
-    if (!validStatuses.includes(status)) {
-        return res.status(400).json({
+    const updatedOrder = await orderService.updateOrderStatus(id, status);
+
+    if (!updatedOrder) {
+        return res.status(404).json({
             success: false,
-            message: "Invalid order status"
+            message: "Order not found"
         });
     }
 
-    try {
-        const order = await Order.findById(id);
-
-        if (!order) {
-            return res.status(404).json({
-                success: false,
-                message: "Order not found"
-            });
-        }
-
-        order.status = status;
-        const updatedOrder = await order.save();
-
-        res.status(200).json({
-            success: true,
-            order: updatedOrder
-        });
-
-    } catch (error) {
-        console.error("UPDATE ORDER STATUS ERROR:", error);
-        res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
+    res.status(200).json({
+        success: true,
+        order: updatedOrder
+    });
 };
 
+const asyncHandler = require("../utils/asyncHandler");
+
 module.exports = {
-    createOrder,
-    getUserOrders,
-    getAllOrders,
-    updateOrderStatus
+    createOrder: asyncHandler(createOrder),
+    getUserOrders: asyncHandler(getUserOrders),
+    getAllOrders: asyncHandler(getAllOrders),
+    updateOrderStatus: asyncHandler(updateOrderStatus)
 };

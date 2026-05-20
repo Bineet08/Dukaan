@@ -6,7 +6,9 @@ const {
     updateProduct,
     deleteProduct
 } = require("../controllers/productController");
-const { protect, admin } = require("../middleware/authMiddleware");
+const { protect, adminOnly } = require("../middleware/authMiddleware");
+const validate = require("../middleware/validate");
+const { addProductSchema, updateProductSchema } = require("../validators/productValidators");
 
 const router = express.Router();
 
@@ -19,8 +21,8 @@ router.get("/:id", getProductById);    // GET product by ID
 /* =========================
    ADMIN ROUTES
    ========================= */
-router.post("/add", protect, admin, addProduct);       // CREATE product
-router.put("/:id", protect, admin, updateProduct); // UPDATE product
-router.delete("/:id", protect, admin, deleteProduct); // DELETE product
+router.post("/add", protect, adminOnly, validate(addProductSchema), addProduct);       // CREATE product
+router.put("/:id", protect, adminOnly, validate(updateProductSchema), updateProduct); // UPDATE product
+router.delete("/:id", protect, adminOnly, deleteProduct); // DELETE product
 
 module.exports = router;

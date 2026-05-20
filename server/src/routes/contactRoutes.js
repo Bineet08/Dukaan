@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { sendContactMessage, getAllMessages } = require("../controllers/contactController");
-const { protect, admin } = require("../middleware/authMiddleware");
+const { protect, adminOnly } = require("../middleware/authMiddleware");
+const validate = require("../middleware/validate");
+const { contactMessageSchema } = require("../validators/contactValidators");
 
-
-router.post("/", sendContactMessage);
-router.get("/", protect, admin, getAllMessages);
+router.post("/", validate(contactMessageSchema), sendContactMessage);
+router.get("/", protect, adminOnly, getAllMessages);
 
 module.exports = router;
