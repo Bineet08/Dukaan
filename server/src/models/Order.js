@@ -91,6 +91,19 @@ const orderSchema = new mongoose.Schema(
             updateTime: String,
             email: String,
         },
+        isPaid: {
+            type: Boolean,
+            default: false,
+        },
+        paidAt: {
+            type: Date,
+            default: null,
+        },
+        paymentRef: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "PaymentMethod",
+            default: null,
+        },
     },
     { timestamps: true }
 );

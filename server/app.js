@@ -8,7 +8,9 @@ const requiredEnv = [
   "JWT_SECRET",
   "CLOUDINARY_CLOUD_NAME",
   "CLOUDINARY_API_KEY",
-  "CLOUDINARY_SECRET_KEY"
+  "CLOUDINARY_SECRET_KEY",
+  "RAZORPAY_KEY_ID",
+  "RAZORPAY_KEY_SECRET"
 ];
 const missingEnv = requiredEnv.filter(key => !process.env[key]);
 if (missingEnv.length > 0) {
@@ -21,6 +23,7 @@ const userRoutes = require("./src/routes/userRoutes");
 const orderRoutes = require("./src/routes/orderRoutes");
 const contactRoutes = require("./src/routes/contactRoutes");
 const uploadRoutes = require("./src/routes/uploadRoutes");
+const paymentRoutes = require("./src/routes/paymentRoutes");
 
 const rateLimit = require("express-rate-limit");
 
@@ -77,7 +80,7 @@ app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/register", authLimiter);
 app.use("/api/upload", uploadLimiter);
 app.use("/api/contact", contactLimiter);
-app.use("/api", apiLimiter);
+app.use("/api/payments", apiLimiter);
 
 /* ---------- Security ---------- */
 app.use(helmet());
@@ -166,6 +169,7 @@ app.use("/api/auth", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/payments", paymentRoutes);
 
 
 /* ---------- Health Check ---------- */

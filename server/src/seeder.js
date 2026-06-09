@@ -15,6 +15,7 @@ const products = [
         category: "beauty",
         originalPrice: 40,
         newPrice: 30,
+        stock: 120
     },
     {
         name: "Milk",
@@ -22,6 +23,7 @@ const products = [
         category: "grocery",
         originalPrice: 60,
         newPrice: 55,
+        stock: 80
     },
     {
         name: "Bread",
@@ -29,6 +31,7 @@ const products = [
         category: "grocery",
         originalPrice: 35,
         newPrice: 30,
+        stock: 50
     }
 ];
 
