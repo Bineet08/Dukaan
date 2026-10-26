@@ -66,7 +66,9 @@ const ProductCard = ({ product }) => {
         {/* Wishlist Icon */}
         <button
           onClick={handleWishlistToggle}
-          className="absolute top-2.5 right-2.5 p-1.5 bg-white/90 hover:bg-white text-slate-400 hover:text-red-500 rounded-full shadow-soft z-10 transition duration-200 cursor-pointer"
+          aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+          aria-pressed={isWishlisted}
+          className="absolute top-2.5 right-2.5 min-h-12 min-w-12 flex items-center justify-center bg-white/90 hover:bg-white text-slate-400 hover:text-red-500 rounded-full shadow-soft z-10 transition duration-200 cursor-pointer focus-visible:outline-none"
         >
           <Heart
             className={`h-4 w-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`}
@@ -80,6 +82,7 @@ const ProductCard = ({ product }) => {
             alt={product.name}
             className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-300">
@@ -121,19 +124,24 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* Blinkit quantity action buttons */}
-        <div className="w-20 h-9 shrink-0 flex items-center justify-center">
+        <div className="w-28 h-12 shrink-0 flex items-center justify-center">
           {cartQty > 0 ? (
-            <div className="w-full h-full flex items-center justify-between bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-soft px-1.5 overflow-hidden transition select-none">
+            <div className="w-full h-full flex items-center justify-between bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-soft overflow-hidden transition select-none">
               <button
-                onClick={() => updateQuantity(product._id, cartQty - 1)}
-                className="p-1 hover:bg-white/10 rounded transition cursor-pointer"
+                onClick={() => {
+                  updateQuantity(product._id, cartQty - 1);
+                  if (cartQty === 1) toast.success(`${product.name} removed from cart`);
+                }}
+                aria-label={`Decrease ${product.name} quantity`}
+                className="min-h-12 min-w-12 flex items-center justify-center hover:bg-white/10 transition cursor-pointer"
               >
                 <Minus className="h-3.5 w-3.5" />
               </button>
               <span className="text-xs font-extrabold">{cartQty}</span>
               <button
                 onClick={() => updateQuantity(product._id, cartQty + 1)}
-                className="p-1 hover:bg-white/10 rounded transition cursor-pointer"
+                aria-label={`Increase ${product.name} quantity`}
+                className="min-h-12 min-w-12 flex items-center justify-center hover:bg-white/10 transition cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5" />
               </button>

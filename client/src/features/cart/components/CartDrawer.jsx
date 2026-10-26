@@ -7,11 +7,13 @@ import { X, Trash2, ShoppingBag, Plus, Minus, ArrowRight } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDialogFocus } from "../../../hooks/useDialogFocus";
 
 const CartDrawer = () => {
   const { cartItems, updateQuantity, removeFromCart, clearCart, isCartOpen, setIsCartOpen } = useCart();
   const user = useUserStore((state) => state.user);
   const navigate = useNavigate();
+  const dialogRef = useDialogFocus(isCartOpen, () => setIsCartOpen(false));
 
   const [detailedItems, setDetailedItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -161,6 +163,11 @@ const CartDrawer = () => {
             animate="visible"
             exit="exit"
             transition={{ type: "tween", ease: [0.32, 0.72, 0, 1], duration: 0.35 }}
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cart-drawer-title"
+            tabIndex={-1}
             className="fixed z-50 bg-white shadow-2xl flex flex-col
               inset-x-0 bottom-0 max-h-[85vh] rounded-t-3xl
               sm:inset-y-0 sm:right-0 sm:left-auto sm:max-h-full sm:w-full sm:max-w-md sm:rounded-t-none sm:rounded-l-3xl sm:border-l sm:border-slate-100"
@@ -174,7 +181,7 @@ const CartDrawer = () => {
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="h-5 w-5 text-green-600" />
-                <h2 className="text-base font-bold text-slate-800">Your Basket</h2>
+                <h2 id="cart-drawer-title" className="text-base font-bold text-slate-800">Your Basket</h2>
                 {cartItems.length > 0 && (
                   <span className="bg-green-50 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
                     {cartItems.length}
@@ -183,7 +190,9 @@ const CartDrawer = () => {
               </div>
               <button
                 onClick={() => setIsCartOpen(false)}
-                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                aria-label="Close cart"
+                data-dialog-initial-focus
+                className="min-h-12 min-w-12 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -209,12 +218,12 @@ const CartDrawer = () => {
                     <ShoppingBag className="h-8 w-8" />
                   </div>
                   <p className="font-bold text-slate-600 text-sm">Basket is empty</p>
-                  <p className="text-xs text-slate-400 max-w-[200px]">
+                  <p className="text-xs text-slate-400 max-w-50">
                     Add essentials from the store to get started.
                   </p>
                   <button
                     onClick={() => { setIsCartOpen(false); navigate("/products"); }}
-                    className="bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-5 py-2 rounded-xl transition cursor-pointer mt-2"
+                    className="min-h-12 bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-5 rounded-xl transition cursor-pointer mt-2"
                   >
                     Start Shopping
                   </button>
@@ -236,7 +245,11 @@ const CartDrawer = () => {
                           <img
                             src={item.image}
                             alt={item.name}
+                            width="48"
+                            height="48"
                             className="h-12 w-12 rounded-lg object-cover shrink-0 bg-white"
+                            loading="lazy"
+                            decoding="async"
                           />
                         )}
                         <div className="flex-1 min-w-0">
@@ -247,23 +260,32 @@ const CartDrawer = () => {
                         {/* Quantity controls */}
                         <div className="flex items-center bg-white border border-slate-200 rounded-lg overflow-hidden shrink-0">
                           <button
-                            onClick={() => updateQuantity(item.productId, item.qty - 1)}
-                            className="p-1.5 hover:bg-slate-50 text-slate-500 transition cursor-pointer"
+                            onClick={() => {
+                              updateQuantity(item.productId, item.qty - 1);
+                              if (item.qty === 1) toast.success(`${item.name} removed from cart`);
+                            }}
+                            aria-label={`Decrease ${item.name} quantity`}
+                            className="min-h-12 min-w-12 flex items-center justify-center hover:bg-slate-50 text-slate-500 transition cursor-pointer"
                           >
                             <Minus className="h-3 w-3" />
                           </button>
                           <span className="px-2 text-xs font-bold text-slate-800 select-none">{item.qty}</span>
                           <button
                             onClick={() => updateQuantity(item.productId, item.qty + 1)}
-                            className="p-1.5 hover:bg-slate-50 text-slate-500 transition cursor-pointer"
+                            aria-label={`Increase ${item.name} quantity`}
+                            className="min-h-12 min-w-12 flex items-center justify-center hover:bg-slate-50 text-slate-500 transition cursor-pointer"
                           >
                             <Plus className="h-3 w-3" />
                           </button>
                         </div>
 
                         <button
-                          onClick={() => removeFromCart(item.productId)}
-                          className="text-slate-300 hover:text-red-500 transition cursor-pointer p-1"
+                          onClick={() => {
+                            removeFromCart(item.productId);
+                            toast.success(`${item.name} removed from cart`);
+                          }}
+                          aria-label={`Remove ${item.name} from cart`}
+                          className="min-h-12 min-w-12 flex items-center justify-center text-slate-300 hover:text-red-500 transition cursor-pointer"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -280,6 +302,8 @@ const CartDrawer = () => {
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.25 }}
                         onSubmit={handlePlaceOrder}
+                        aria-hidden={!showCheckoutForm}
+                        inert={showCheckoutForm ? undefined : ""}
                         className="overflow-hidden border-t border-slate-100 pt-4 mt-4 space-y-3"
                       >
                         <h3 className="font-bold text-xs text-slate-700">Delivery Info</h3>
@@ -290,6 +314,7 @@ const CartDrawer = () => {
                           placeholder="Full address, house no, landmark"
                           required
                           className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs placeholder:text-slate-400 focus:outline-none focus:border-green-500 transition"
+                          aria-label="Shipping address"
                         />
                         <input
                           type="tel"
@@ -298,11 +323,13 @@ const CartDrawer = () => {
                           placeholder="Phone number"
                           required
                           className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs placeholder:text-slate-400 focus:outline-none focus:border-green-500 transition"
+                          aria-label="Phone number"
                         />
                         <button
                           type="submit"
                           disabled={isPlacingOrder}
-                          className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl font-bold text-xs transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                          className="min-h-12 w-full bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                          aria-label={isPlacingOrder ? "Placing order" : "Confirm order"}
                         >
                           {isPlacingOrder ? "Placing..." : "Confirm Order"}
                           <ArrowRight className="h-3.5 w-3.5" />
@@ -323,8 +350,11 @@ const CartDrawer = () => {
                     <p className="text-lg font-extrabold text-slate-900">₹{total}</p>
                   </div>
                   <button
-                    onClick={clearCart}
-                    className="text-[11px] text-red-400 hover:text-red-600 font-semibold cursor-pointer transition"
+                    onClick={() => {
+                      clearCart();
+                      toast.success("Cart cleared");
+                    }}
+                    className="min-h-12 px-2 text-[11px] text-red-400 hover:text-red-600 font-semibold cursor-pointer transition"
                   >
                     Clear all
                   </button>
@@ -342,7 +372,8 @@ const CartDrawer = () => {
                       }
                       setShowCheckoutForm(true);
                     }}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold text-sm transition cursor-pointer flex items-center justify-center gap-2"
+                    className="min-h-12 w-full bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-sm transition cursor-pointer flex items-center justify-center gap-2"
+                    aria-label="Proceed to checkout"
                   >
                     Checkout
                     <ArrowRight className="h-4 w-4" />
@@ -350,7 +381,7 @@ const CartDrawer = () => {
                 ) : (
                   <button
                     onClick={() => setShowCheckoutForm(false)}
-                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl font-bold text-xs transition cursor-pointer"
+                    className="min-h-12 w-full bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-xs transition cursor-pointer"
                   >
                     ← Back to items
                   </button>

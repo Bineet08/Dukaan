@@ -135,7 +135,7 @@ const Hero = () => {
               <img
                 src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fm=webp&q=80"
                 alt="Fresh groceries"
-                className="w-full h-[340px] object-cover"
+                className="w-full h-85 object-cover"
                 loading="eager"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />

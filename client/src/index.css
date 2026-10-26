@@ -44,6 +44,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+:focus-visible {
+  outline: 3px solid #059669;
+  outline-offset: 2px;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

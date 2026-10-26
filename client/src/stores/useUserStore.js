@@ -3,30 +3,60 @@ import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
 
 export const useUserStore = create((set, get) => ({
-    // 🔐 hydrate safely
+    // Hydrate safely when browser storage is unavailable or contains invalid JSON.
     user: (() => {
         try {
             return JSON.parse(localStorage.getItem("user"));
-        } catch {
+        } catch (error) {
+            console.error("Unable to read saved user from browser storage:", error);
             return null;
         }
     })(),
-    token: localStorage.getItem("token"),
+    token: (() => {
+        try {
+            return localStorage.getItem("token");
+        } catch (error) {
+            console.error("Unable to read saved login token from browser storage:", error);
+            return null;
+        }
+    })(),
     loading: false,
 
     // FIX BUG-14: single source of truth for persisting auth state.
     // register() and login() now both call setAuth() instead of
     // duplicating localStorage + set() logic independently.
     setAuth: (user, token) => {
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("token", token);
         set({ user, token });
+        try {
+            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("token", token);
+        } catch (error) {
+            console.error("Unable to persist login to browser storage:", error);
+            for (const key of ["user", "token"]) {
+                try {
+                    localStorage.removeItem(key);
+                } catch (cleanupError) {
+                    console.error(`Unable to clear incomplete saved ${key}:`, cleanupError);
+                }
+            }
+            toast.error("You are signed in, but this browser could not save your session.");
+        }
     },
 
     clearAuth: () => {
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
         set({ user: null, token: null });
+        let storageError = null;
+        for (const key of ["user", "token"]) {
+            try {
+                localStorage.removeItem(key);
+            } catch (error) {
+                storageError = error;
+                console.error(`Unable to remove saved ${key} from browser storage:`, error);
+            }
+        }
+        if (storageError) {
+            toast.error("Your session ended, but saved login data could not be fully cleared from this browser.");
+        }
     },
 
     register: async (name, email, password, confirmPassword) => {
@@ -96,9 +126,7 @@ export const useUserStore = create((set, get) => ({
     },
 
     logout: () => {
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        set({ user: null, token: null });
+        get().clearAuth();
         toast.success("Logout successful");
     },
 }));

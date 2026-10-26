@@ -104,7 +104,7 @@ const ProductsPage = () => {
             <button
               key={cat.name}
               onClick={() => handleCategorySelect(cat.value)}
-              className={`px-4 py-2.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer shadow-soft border ${
+              className={`min-h-12 px-4 py-2.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer shadow-soft border ${
                 isSelected
                   ? "bg-green-600 border-green-600 text-white"
                   : "bg-white border-slate-100 text-slate-600 hover:bg-slate-50 hover:border-slate-200"

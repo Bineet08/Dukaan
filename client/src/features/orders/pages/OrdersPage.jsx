@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useUserStore } from "../../../stores/useUserStore";
 import { orderService } from "../services/orderService";
 import { handleApiError } from "../../../lib/errorHandler";
+import { useNavigate } from "react-router-dom";
 
 const OrdersPage = () => {
     const user = useUserStore((state) => state.user);
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     /* =========================
        FETCH USER ORDERS
@@ -174,12 +176,20 @@ const OrdersPage = () => {
                                 <span className="font-bold text-lg">
                                     Total: ₹{order.totalAmount}
                                 </span>
+                                <span className="flex justify-between items-center ">
                                 <span
-                                    className={`text-sm font-semibold px-3 py-1 rounded-full ${getStatusColor(
+                                    className={`text-sm font-semibold px-5 py-1 rounded-full ${getStatusColor(
                                         order.status
                                     )}`}
                                 >
                                     {order.status}
+                                </span>
+                                {order.status=='Pending' && (
+                                    <div>
+                                        <button className="text-sm font-semibold px-5 py-1 rounded-4xl bg-green-500"
+                                        onClick={()=>navigate(`/cart/`)}>Pay Now</button>
+                                    </div>
+                                )}
                                 </span>
                             </div>
                         </div>

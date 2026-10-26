@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const Header = () => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const accountButtonRef = useRef(null);
   const [searchParams] = useSearchParams();
 
   const { cartItems, setIsCartOpen } = useCart();
@@ -40,6 +41,18 @@ const Header = () => {
     return () =>
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!isDropdownOpen) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsDropdownOpen(false);
+        accountButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isDropdownOpen]);
 
   const handleMenuClick = (path) => {
     setIsDropdownOpen(false);
@@ -125,7 +138,8 @@ const Header = () => {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsCartOpen(true)}
-            className="relative p-2 text-slate-700 hover:text-green-600 hover:bg-slate-50 rounded-xl transition cursor-pointer flex items-center justify-center"
+            aria-label={`Open cart${cartCount > 0 ? `, ${cartCount} items` : ""}`}
+            className="relative min-h-12 min-w-12 text-slate-700 hover:text-green-600 hover:bg-slate-50 rounded-xl transition cursor-pointer flex items-center justify-center"
           >
             <ShoppingBag className="h-5 w-5" />
             <AnimatePresence>
@@ -147,8 +161,11 @@ const Header = () => {
           {/* User Account Menu */}
           <div className="relative" ref={dropdownRef}>
             <motion.button
+              ref={accountButtonRef}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsDropdownOpen((p) => !p)}
+              aria-label="Account menu"
+              aria-expanded={isDropdownOpen}
               className="flex items-center gap-1.5 p-1 rounded-full hover:bg-slate-50 border border-transparent hover:border-slate-100 transition cursor-pointer"
             >
               <img

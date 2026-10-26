@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import { toast } from "react-hot-toast";
 
 const CartContext = createContext();
 
@@ -16,10 +17,20 @@ export const CartProvider = ({ children }) => {
 
   // Slide-out Drawer Visibility State
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const storageErrorShown = useRef(false);
 
   // Persist cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cartItems));
+    try {
+      localStorage.setItem("cart", JSON.stringify(cartItems));
+      storageErrorShown.current = false;
+    } catch (error) {
+      console.error("Unable to save cart to browser storage:", error);
+      if (!storageErrorShown.current) {
+        toast.error("Your cart is available for this visit, but could not be saved on this device.");
+        storageErrorShown.current = true;
+      }
+    }
   }, [cartItems]);
 
   const addToCart = (product) => {
